@@ -1,0 +1,263 @@
+%*******************************************************************************************% 
+% 								Getting started working with MPTK							%
+% 																							%
+% Description : This tutorial describes the different possibilities to use MPTK library		%						
+% 																							%
+% Editors : 																				%
+%			Rémi Gribonval (IRISA, France)													%
+%			Sacha Krstulovic																%
+%			Benjamin Roy (IRISA, France)													%
+%			Boris Mailhé (IRISA, France)													%
+%			Ronan Le Boulch (IRISA, France)													%
+%*******************************************************************************************% 
+
+%---------------------
+% Welcoming the users
+%---------------------
+disp('-----------------------------');
+disp('Welcome to MPTK within Matlab');
+disp('-----------------------------');
+disp('(press enter to continue) ...'); pause;
+
+%-----------------------------------------------
+% Checking the MPTK_CONFIG_FILENAME availability
+%-----------------------------------------------
+if isempty(getenv('MPTK_CONFIG_FILENAME'))
+    % If not, try to locate the default path.xml location
+    configFileName  = '/usr/local/mptk/path.xml';
+	disp('1) To begin with, we need to configure your system so that MPTK can locate its plugins.');
+	disp('The necessary informations are stored within a file typically located where MPTK was installed :');
+	disp(' ');
+	disp(['		-->' configFileName]);
+	disp(' ');
+	disp('2) Let us now check if we can find this file');
+	disp('(press enter to continue) ...');pause;
+    if exist(configFileName,'file')
+		disp(' ');
+		disp('		--> YES');
+		disp(' ');
+    else
+		disp(' ');
+		disp('		--> NO');
+		disp(' ');
+		disp('Can you help ?');
+		disp('Please check your installation and provide the full path for the file ''path.xml''.');
+        configFileName = input('File path :','s');
+        if ~exist(configFileName,'file')
+			disp('		--> Sorry, but we will need this path to continue!');
+			disp('		--> Please read this documentation and restart GettingStarted.m when you have the information');
+            return;
+        else
+			disp('		--> OK, thank you!');
+        end
+    end
+	%----------------------------------
+	% Setting the environment variable
+	%----------------------------------
+	disp('3) Now, we need to set the system environment variable MPTK_CONFIG_FILENAME to keep this information');
+	disp('From Matlab, you can type the following command line to set this variable for the duration of your session');
+	disp(' ');
+	disp(['		--> setenv(''MPTK_CONFIG_FILENAME'',''' configFileName ''')' ]);
+	disp(' ');
+	disp('(press enter to continue) ...');pause;
+	disp('Let us do it for the current session !!');
+    setenv('MPTK_CONFIG_FILENAME',configFileName);
+	disp('(press enter to continue) ...');pause;
+	disp('4) For further use, it is be more comfortable to set MPTK_CONFIG_FILENAME at the system level.');
+    if isunix || ismac
+		disp('	* You seem to be running a Unix type system (e.g., Linux or MacOSX).');
+		disp('		To set an environment variable, some possibilities include:');
+		disp('			+ With the Bash shell: export MPTK_CONFIG_FILENAME="path_to_MPTK/path.xml"');
+		disp('			+ With the C-shell: setenv MPTK_CONFIG_FILENAME "path_to_MPTK/path.xml"');
+		disp('		You can check if the environment variable is correctly set with:');
+		disp('			+ echo $MPTK_CONFIG_FILENAME');
+		disp('		To determine which shell you are using:');
+		disp('			+ sh --version');
+    else
+		disp('	* You seem to be running a Windows type system.');
+		disp('		From a command window you can temporarily set up a system environment variable:');
+		disp('			+ Obtaining the command window : Start>Execute>"cmd"');
+		disp('			+ SET MPTK_CONFIG_FILENAME=path_to_MPTK/path.xml');
+		disp('		To check if the environment variable is correctly set you can use the ECHO command:');
+		disp('   		+ echo %MPTK_CONFIG_FILENAME%');
+		disp('		A more permanent way to manage environment variables is using the System Properties dialog box:');
+		disp(' 			+ Open ''Control Panel>Performance and Maintenance>System''');
+		disp('			(or right-click on ''My Computer'' and choose "Properties").');
+		disp('				- Click on the "Advanced" tab to obtain a dialog box. ');
+		disp('				- Click the button "Environment Variables"');
+		disp('				- Add a new user variable named MPTK_CONFIG_FILENAME and as a value the path to desired xml file.');
+    end
+	disp('(press enter to continue) ...');pause;
+end 
+
+%-----------------------------------------------
+% Querying MPTK to get some information
+%-----------------------------------------------
+disp(' ');
+disp('--------------------------');
+disp('Getting MPTK informations ');
+disp('--------------------------');
+mptkInfo = getmptkinfo;
+disp(' ');
+disp('MPTK is a C++ toolbox implementing Matching Pursuit algorithms as fast as it can for various types of signal dictionaries.');
+disp('The Matlab interface to MPTK makes it possible to interact with MPTK from the Matlab command line.');
+disp('For example, it is possible to retrieve the list of types of atoms available in MPTK plugins:')
+for i=1:length(mptkInfo.atoms)
+	disp(['	- ' mptkInfo.atoms(i).type]);
+end
+disp('(press enter to continue)');pause;
+disp('as well as information on the path where reference files can be found:');
+disp(['	- ' mptkInfo.path.reference]);
+disp('which can be used to find examples of dictionaries');
+dir([mptkInfo.path.reference '/dictionary/*.xml'])
+disp('(press enter to continue)');pause;
+quitTutorial = 0;
+while (quitTutorial == 0)
+	tutorialName = input(...
+		['There are several tutorials on using MPTK4Matlab, please choose which tutorial you want to run:\n'...
+ 		'	(0 or q): Quit tutorials\n'...
+ 		'	(1): Dictionaries, how to create them and use them\n'...
+ 		'	(2): Books, which store sparse representations how to process them, visualise them, etc\n'...
+ 		'	(3): Running Matching Pursuit\n'...
+ 		'	(4): Multichannel decompositions (in preparation) \n'...
+ 		'	(5): Anywave atoms (in preparation)\n'...
+ 		'	(6): Demixing pursuit (in preparation)\n'],'s');
+	switch tutorialName
+		case '0','q'
+			quitTutorial = 1;
+		case '1'			
+			%--------------
+			% Dictionaries
+			%--------------
+			disp('----------------------');
+			disp('Dictionaries Tutorial ');
+			disp('----------------------');
+			disp('Dictionaries are very important in MPTK, because they describe the collections of atoms');
+			disp('that are used to decompose signals. MPTK never actually build a large collection of atoms');
+			disp('(or even a large matrix) but simply manipulates objects that *describe* the collection of atoms.');
+			disp('There are several ways to describe a dictionary.');
+			disp(' ');
+			disp('Dictionary description files:');
+			disp('----------------------------');
+			disp(['There are several XML files in the directory ''' mptkInfo.path.reference '/dictionary''']);
+			disp('Each of them is a description of a dictionary, and can be loaded into Matlab using:');
+			disp('   dict = dictread(filename)')
+			disp('For example let us try');
+			disp(['   dict = dictread(''' mptkInfo.path.reference '/dictionary/dic_gabor_two_scales.xml'')']);
+			disp('(press enter to continue)');pause;
+			dict = dictread([mptkInfo.path.reference '/dictionary/dic_gabor_two_scales.xml'])
+			disp('Similarly, a dictionary stored as a variable in Matlab can be written to a file using');
+			disp('   dictwrite(dict,filename)')
+			disp('The dictionary we have just read contains two ''blocks'' that happen to describe large collections');
+			disp('of Gabor atoms. For example the first block is');
+			dict.block{1}
+			disp(['and corresponds to a collection of ' dict.block{1}.type ' atoms of length ' dict.block{1}.windowLen]); 
+			disp('(press enter to continue)');pause;
+			disp('To create a dictionary description file, you can');
+			disp('a) read the documentation and start writing some XML');
+			disp('or ...') 
+			disp('(press enter to continue)');pause;
+			disp('b) read the documentation, write a Matlab program that builds some Matlab variable newdict with appropriate fields');
+			disp('   and save it using dictwrite()');
+			disp('or ...') 
+			disp('(press enter to continue)');pause;
+			disp('c) use the dictcreate_gui Graphical interface!');
+			dictcreate_gui;
+			disp('(press enter to finish Dictionaries tutorial)');pause;
+		case '2'
+			%--------------
+			% Books
+			%--------------
+			disp('----------------------');
+			disp('     Book Tutorial    ');
+			disp('----------------------');
+			disp('Books are storage format for sparse signal representations.');
+			disp('They can be read and written from/to a disk file using the bookread and bookwrite functions. For example we can try:');
+			disp('         book = bookread(mptkInfo.path.exampleBook)');
+			disp('(press enter to continue)');pause;
+			book = bookread(mptkInfo.path.exampleBook)
+			disp('This book can be plotted using:');
+			disp('         figure(1);bookplot(book).');
+			disp('(press enter to continue)');pause;
+			figure(1);bookplot(book);
+			disp('A more elaborate plot superimposed with the spectrogram of the corresponding signal using bookover.');
+			disp('We need to retrieve the analysed signal, which turns out to be available in the example files.');
+			disp('         sig = sigread(mptkInfo.path.exampleSignal)');
+			disp('         figure(2);bookover(book,sig)');
+			disp('(press enter to continue)');pause;
+			sig = sigread(mptkInfo.path.exampleSignal);
+			figure(2);bookover(book,sig);
+			disp('It is also possible to reconstruct a signal from the book. Let us see what the corresponding time-frequency plot gives');
+			disp('         sigrec = mprecons(book)');
+			disp('         figure(3);bookover(book,sigrec)');
+			disp('(press enter to continue)');pause;
+			sigrec = mprecons(book);
+			figure(3);bookover(book,sigrec);
+			disp('Let us now compare the original signal with the reconstructed one:')
+			disp('(press enter to continue)');pause;
+			figure(4);plot(sig,'b');
+			hold on;plot(sigrec,'r');plot(sigrec-sig,'k');
+			legend('original signal','reconstructed signal','difference');
+			disp('There is also an experimental interface to play with books.')
+			disp('You can try to play with bookedit(book).');
+			disp('(press enter to continue)');pause;
+			bookedit(book);
+			disp('Don''t hesitate to have a look at the code of bookedit to understand the current structure of books¯.');
+			disp('However, keep in mind that the structure of books will certainly change in the next verstion of MPTK4Matlab!');
+			disp('(press enter to continue)');pause;disp('(press enter to finish Books tutorial)');pause;
+		case '3'
+			%------------------
+			% Matching pursuit
+			%------------------
+			disp('To run Matching Pursuit, simply use the mpdecomp command');
+			disp('For example, let us load a signal and decompose it using the default dictionary');
+			disp('       [sig sampleRate] = sigread(mptkInfo.path.exampleSignal);');
+			disp('       dict = dictread(mptkInfo.path.defaultDict);');
+			disp('       [book residual decay] = mpdecomp(sig,sampleRate,dict,100);');
+			disp('       figure(5);bookover(book,sig);');
+			disp('(press enter to continue)');pause;
+		    [sig sampleRate] = sigread(mptkInfo.path.exampleSignal);
+		    dict = dictread(mptkInfo.path.defaultDict);
+		    [book residual decay] = mpdecomp(sig,sampleRate,dict,100);
+		    figure(5);bookover(book,sig);
+			disp('(press enter to finish Running Matching Pursuit tutorial)');pause;
+		case '4'
+			%--------------
+			% Multichannel
+			%--------------
+			disp('Tutorial in preparation');
+		case '5'
+			%---------
+			% Anywave
+			%---------
+			disp('(press enter to continue)');pause;
+		    [sig sampleRate] = sigread(mptkInfo.path.exampleSignal);
+		    dict = dictread(mptkInfo.path.defaultAnyWaveDict);
+		    [book residual decay] = mpdecomp(sig,sampleRate,dict,1000);
+			sigrec = mprecons(book);
+			sigwrite(sigrec,'/Users/rleboulc/bar/mptk/reference/signal/RECONST.wav',sampleRate)
+		case '6'
+			%------------------
+			% Demixing Pursuit
+			%------------------
+			disp('Tutorial in preparation');
+
+
+%%% TODO
+%%% Should have a full directory for tutorials
+%%% src/matlab/GettingStarted.m.in
+
+%%% Next topics :
+%%% Running a decomposition + filtering + reconstruction
+%%% Multichannel : with an exampleBookStereo
+%%% Anywave
+%%% Demix
+%%%
+
+otherwise
+  disp('Unknown choice');
+end% switch tutorial
+
+end % while
+
+disp('Bye');
